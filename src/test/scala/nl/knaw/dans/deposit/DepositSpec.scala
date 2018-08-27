@@ -31,44 +31,46 @@ import scala.language.{ existentials, implicitConversions, postfixOps }
 import scala.util.{ Failure, Success }
 
 class DepositSpec extends TestSupportFixture
-  with FileSystemSupport
   with TestDeposits
   with TestBags
   with FixDateTimeNow
   with Lipsum {
 
-  "empty" should "create a deposit directory with a bag directory named after the bagId" in {
-    val baseDir = testDir / "emptyTestDeposit"
+  "from" should "create a deposit directory named after the bagId" in {
+    val baseDir = testDir / "emptyTestDeposit" createDirectories()
+    val bagName = "my-bag"
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val bagInfo = Map("Is-Version-Of" -> Seq(UUID.randomUUID().toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    val bagDir = baseDir / bagId.toString
+    val depositDir = baseDir / bagId.toString
+    val bagDir = depositDir / bagName
 
-    baseDir.toJava shouldNot exist
+    baseDir.toJava should exist
+    depositDir.toJava shouldNot exist
     bagDir.toJava shouldNot exist
 
-    inside(Deposit.from(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
         baseDir.toJava should exist
+        depositDir.toJava should exist
         bagDir.toJava should exist
         deposit.bag.baseDir shouldBe bagDir
     }
   }
 
   it should "create a deposit directory with a bag directory in it, equivalent to calling Bag.empty" in {
-    val baseDir = testDir / "emptyTestDeposit"
+    val baseDir = testDir / "emptyTestDeposit" createDirectories()
+    val bagName = "my-bag"
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val bagInfo = Map("Is-Version-Of" -> Seq(UUID.randomUUID().toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.from(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
         deposit.bag.baseDir.listRecursively.toList should contain only(
           deposit.bag.baseDir / "data",
@@ -81,32 +83,32 @@ class DepositSpec extends TestSupportFixture
   }
 
   it should "create a deposit directory with a deposit.properties file in it" in {
-    val baseDir = testDir / "emptyTestDeposit"
+    val baseDir = testDir / "emptyTestDeposit" createDirectories()
+    val bagName = "my-bag"
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val bagInfo = Map("Is-Version-Of" -> Seq(UUID.randomUUID().toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.from(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        (deposit.baseDir / "deposit.properties").toJava should exist
+        (deposit.baseDir / Deposit.depositPropertiesName).toJava should exist
     }
   }
 
   it should "create a deposit directory with a deposit.properties file in it, containing the given, basic properties" in {
-    val baseDir = testDir / "emptyTestDeposit"
+    val baseDir = testDir / "emptyTestDeposit" createDirectories()
+    val bagName = "my-bag"
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val bagInfo = Map("Is-Version-Of" -> Seq(UUID.randomUUID().toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.from(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        val props = new PropertiesConfiguration(deposit.baseDir / "deposit.properties" toJava)
+        val props = new PropertiesConfiguration(deposit.baseDir / Deposit.depositPropertiesName toJava)
         props.getKeys.asScala.toList should contain only(
           DepositProperties.creationTimestamp,
           DepositProperties.stateLabel,
@@ -124,16 +126,16 @@ class DepositSpec extends TestSupportFixture
   }
 
   it should "return a Deposit object with the base directory, Bag object and DepositProperties object in it" in {
-    val baseDir = testDir / "emptyTestDeposit"
+    val baseDir = testDir / "emptyTestDeposit" createDirectories()
+    val bagName = "my-bag"
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val baseId = UUID.randomUUID()
     val bagInfo = Map("Is-Version-Of" -> Seq(baseId.toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.from(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
         deposit.creationTimestamp shouldBe fixedDateTimeNow
         deposit.stateLabel shouldBe state.label
@@ -141,7 +143,7 @@ class DepositSpec extends TestSupportFixture
         deposit.bagId shouldBe bagId
         deposit.depositor shouldBe depositor.userId
 
-        deposit.bag.baseDir shouldBe baseDir / bagId.toString
+        deposit.bag.baseDir shouldBe baseDir / bagId.toString / bagName
 
         deposit.bag.bagInfo should contain only(
           "Payload-Oxum" -> Seq("0.0"),
@@ -164,21 +166,40 @@ class DepositSpec extends TestSupportFixture
   }
 
   it should "fail when the baseDir of the deposit already exists" in {
-    val baseDir = testDir / "emptyTestDeposit" createIfNotExists(asDirectory = false, createParents = true)
+    val baseDir = testDir / "emptyTestDeposit"
+    val bagName = "my-bag"
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val baseId = UUID.randomUUID()
     val bagInfo = Map("Is-Version-Of" -> Seq(baseId.toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    baseDir.toJava should exist
-    baseDir.isRegularFile shouldBe true
+    baseDir.toJava shouldNot exist
 
-    inside(Deposit.from(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
-      case Failure(e: FileAlreadyExistsException) =>
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
+      case Failure(e: NoSuchFileException) =>
         e should have message baseDir.toString()
+        baseDir.toJava shouldNot exist
+    }
+  }
+
+  it should "fail when the depositDir already exists" in {
+    val baseDir = testDir / "emptyTestDeposit" createDirectories()
+    val bagName = "my-bag"
+    val algorithms = Set(ChecksumAlgorithm.SHA512)
+    val baseId = UUID.randomUUID()
+    val bagInfo = Map("Is-Version-Of" -> Seq(baseId.toString))
+    val state = State(StateLabel.DRAFT, "deposit under construction")
+    val depositor = Depositor("ikke")
+    val bagId = UUID.randomUUID()
+
+    val depositDir = baseDir / bagId.toString createDirectory()
+    depositDir.toJava should exist
+
+    inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
+      case Failure(e: FileAlreadyExistsException) =>
+        e should have message s"$depositDir: deposit needs to be created in this directory, but it already exists"
     }
   }
 
@@ -190,22 +211,35 @@ class DepositSpec extends TestSupportFixture
     (baseDir, file1, file2)
   }
 
-  "createFromData" should "create a deposit directory with a bag directory named after the bagId" in {
+  "createFromData" should "create a deposit directory named after the bagId" in {
     val (baseDir, _, _) = createDataDir()
     val algorithms = Set(ChecksumAlgorithm.SHA512)
     val bagInfo = Map("Is-Version-Of" -> Seq(UUID.randomUUID().toString))
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromData(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    val depositDir = baseDir / bagId.toString
+    depositDir.toJava shouldNot exist
+    val bagDir = depositDir / baseDir.name
+    bagDir.toJava shouldNot exist
+    val depositProperties = depositDir / Deposit.depositPropertiesName
+    depositProperties.toJava shouldNot exist
+
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        deposit.baseDir shouldBe baseDir
-        val bagDir = deposit.baseDir / bagId.toString
+        depositDir.toJava should exist
+        deposit.baseDir shouldBe depositDir
+
         bagDir.toJava should exist
         deposit.bag.baseDir shouldBe bagDir
-        deposit.baseDir.list.filter(_.isDirectory).toList should contain only bagDir
+
+        depositProperties.toJava should exist
+
+        deposit.baseDir.list.toList should contain only (
+          bagDir,
+          depositProperties,
+        )
     }
   }
 
@@ -217,12 +251,11 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromData(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        deposit.baseDir shouldBe baseDir
-        val bagDir = deposit.baseDir / bagId.toString
+        deposit.baseDir shouldBe baseDir / bagId.toString
+        val bagDir = baseDir / bagId.toString / baseDir.name
         bagDir.toJava should exist
         val dataDir = bagDir / "data"
         dataDir.listRecursively.filter(_.isRegularFile).toList should contain only(
@@ -239,11 +272,10 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromData(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        (deposit.baseDir / "deposit.properties").toJava should exist
+        (deposit.baseDir / Deposit.depositPropertiesName).toJava should exist
     }
   }
 
@@ -254,11 +286,10 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromData(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        val props = new PropertiesConfiguration(deposit.baseDir / "deposit.properties" toJava)
+        val props = new PropertiesConfiguration(deposit.baseDir / Deposit.depositPropertiesName toJava)
         props.getKeys.asScala.toList should contain only(
           DepositProperties.creationTimestamp,
           DepositProperties.stateLabel,
@@ -285,9 +316,8 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromData(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
         deposit.creationTimestamp shouldBe fixedDateTimeNow
         deposit.stateLabel shouldBe state.label
@@ -295,7 +325,7 @@ class DepositSpec extends TestSupportFixture
         deposit.bagId shouldBe bagId
         deposit.depositor shouldBe depositor.userId
 
-        deposit.bag.baseDir shouldBe baseDir / bagId.toString
+        deposit.bag.baseDir shouldBe baseDir / bagId.toString / baseDir.name
 
         deposit.bag.bagInfo should contain only(
           "Payload-Oxum" -> Seq("1471.2"),
@@ -327,13 +357,29 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
     baseDir.toJava shouldNot exist
 
-    inside(Deposit.createFromData(baseDir, algorithms, bagInfo, state, depositor, bagStore)) {
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Failure(e: NoSuchFileException) =>
         e should have message baseDir.toString()
+    }
+  }
+
+  it should "fail when the depositDir already exists" in {
+    val (baseDir, _, _) = createDataDir()
+    val algorithms = Set(ChecksumAlgorithm.SHA512)
+    val bagInfo = Map("Is-Version-Of" -> Seq(UUID.randomUUID().toString))
+    val state = State(StateLabel.DRAFT, "deposit under construction")
+    val depositor = Depositor("ikke")
+    val bagId = UUID.randomUUID()
+
+    val depositDir = baseDir / bagId.toString createDirectory()
+    depositDir.toJava should exist
+
+    inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
+      case Failure(e: FileAlreadyExistsException) =>
+        e should have message s"$depositDir: deposit needs to be created in this directory, but it already exists"
     }
   }
 
@@ -342,15 +388,28 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromBag(src, state, depositor, bagStore)) {
+    val depositDir = src / bagId.toString
+    depositDir.toJava shouldNot exist
+    val bagDir = depositDir / src.name
+    bagDir.toJava shouldNot exist
+    val depositProperties = depositDir / Deposit.depositPropertiesName
+    depositProperties.toJava shouldNot exist
+
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
-        deposit.baseDir shouldBe src
-        val bagDir = deposit.baseDir / bagId.toString
+        depositDir.toJava should exist
+        deposit.baseDir shouldBe depositDir
+
         bagDir.toJava should exist
         deposit.bag.baseDir shouldBe bagDir
-        deposit.baseDir.list.filter(_.isDirectory).toList should contain only bagDir
+
+        depositProperties.toJava should exist
+
+        deposit.baseDir.list.toList should contain only (
+          bagDir,
+          depositProperties,
+        )
     }
   }
 
@@ -360,12 +419,10 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromBag(src, state, depositor, bagStore)) {
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
-        deposit.baseDir shouldBe src
-        val bagDir = deposit.baseDir / bagId.toString
+        val bagDir = deposit.baseDir / src.name
         bagDir.toJava should exist
         bagDir.listRecursively.filter(_.isRegularFile).toList should contain only(
           bagDir / "data" / "x",
@@ -389,11 +446,10 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromBag(src, state, depositor, bagStore)) {
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
-        (deposit.baseDir / "deposit.properties").toJava should exist
+        (deposit.baseDir / Deposit.depositPropertiesName).toJava should exist
     }
   }
 
@@ -402,11 +458,10 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromBag(src, state, depositor, bagStore)) {
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
-        val props = new PropertiesConfiguration(deposit.baseDir / "deposit.properties" toJava)
+        val props = new PropertiesConfiguration(deposit.baseDir / Deposit.depositPropertiesName toJava)
         props.getKeys.asScala.toList should contain only(
           DepositProperties.creationTimestamp,
           DepositProperties.stateLabel,
@@ -428,7 +483,6 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
     val xSha1 = (src / "data" / "x").sha1.toLowerCase
     val ySha1 = (src / "data" / "y").sha1.toLowerCase
@@ -442,7 +496,7 @@ class DepositSpec extends TestSupportFixture
     val bagInfoSha1 = (src / "bag-info.txt").sha1.toLowerCase
     val manifestSha1Sha1 = (src / "manifest-sha1.txt").sha1.toLowerCase
 
-    inside(Deposit.createFromBag(src, state, depositor, bagStore)) {
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
         deposit.creationTimestamp shouldBe fixedDateTimeNow
         deposit.stateLabel shouldBe state.label
@@ -450,7 +504,7 @@ class DepositSpec extends TestSupportFixture
         deposit.bagId shouldBe bagId
         deposit.depositor shouldBe depositor.userId
 
-        deposit.bag.baseDir shouldBe src / bagId.toString
+        deposit.bag.baseDir shouldBe src / bagId.toString / src.name
 
         deposit.bag.bagInfo should contain only(
           "Payload-Oxum" -> Seq("72.6"),
@@ -485,13 +539,26 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
     src.toJava shouldNot exist
 
-    inside(Deposit.createFromBag(src, state, depositor, bagStore)) {
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Failure(e: NoSuchFileException) =>
         e should have message src.toString()
+    }
+  }
+
+  it should "fail when the depositDir to be created already exists" in {
+    val src = simpleBagDirV0
+    val state = State(StateLabel.DRAFT, "deposit under construction")
+    val depositor = Depositor("ikke")
+    val bagId = UUID.randomUUID()
+
+    val depositDir = src / bagId.toString createDirectory()
+
+    inside(Deposit.createFromBag(src, bagId, state, depositor)) {
+      case Failure(e: FileAlreadyExistsException) =>
+        e should have message s"$depositDir: deposit needs to be created in this directory, but it already exists"
     }
   }
 
@@ -500,11 +567,10 @@ class DepositSpec extends TestSupportFixture
     val state = State(StateLabel.DRAFT, "deposit under construction")
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
-    val bagStore = BagStore(bagId)
 
-    inside(Deposit.createFromBag(baseDir, state, depositor, bagStore)) {
+    inside(Deposit.createFromBag(baseDir, bagId, state, depositor)) {
       case Failure(e: NoSuchFileException) =>
-        e should have message (baseDir / bagId.toString / "bagit.txt").toString()
+        e should have message (baseDir / bagId.toString / baseDir.name / "bagit.txt").toString()
     }
   }
 
@@ -518,7 +584,7 @@ class DepositSpec extends TestSupportFixture
 
   it should "fail when a deposit does not contain a directory (which might classify as a bag)" in {
     val depositDir = simpleDepositDirV0
-    val bagDir = depositDir / "1c2f78a1-26b8-4a40-a873-1073b9f3a56a"
+    val bagDir = depositDir / "bag"
 
     bagDir.toJava should exist
     bagDir.delete()
@@ -551,7 +617,7 @@ class DepositSpec extends TestSupportFixture
   "bag" should "return the Deposit's bag object" in {
     val deposit = simpleDepositV0()
 
-    deposit.bag.baseDir shouldBe simpleDepositDirV0 / "1c2f78a1-26b8-4a40-a873-1073b9f3a56a"
+    deposit.bag.baseDir shouldBe simpleDepositDirV0 / "bag"
   }
 
   "creationTimestamp" should "return the creation timestamp from deposit.properties" in {

@@ -24,15 +24,15 @@ import scala.util.{ Failure, Success, Try }
 trait TestDeposits extends FileSystemSupport {
   this: TestSupportFixture =>
 
-  protected val minimalDepositPropertiesDirV0: File = testDir / "minimal-deposit-properties"
-  protected val simpleDepositDirV0: File = testDir / "simple-deposit"
+  protected val minimalDepositPropertiesDirV0: File = testDir / "minimal-deposit-properties" / "1c2f78a1-26b8-4a40-a873-1073b9f3a56a"
+  protected val simpleDepositDirV0: File = testDir / "simple-deposit" / "1c2f78a1-26b8-4a40-a873-1073b9f3a56a"
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
 
     val bags = List(
-      "/test-deposits/v0/simple-deposit" -> simpleDepositDirV0,
-      "/test-deposits/v0/minimal-deposit-properties" -> minimalDepositPropertiesDirV0
+      "/test-deposits/v0/simple-deposit/1c2f78a1-26b8-4a40-a873-1073b9f3a56a" -> simpleDepositDirV0,
+      "/test-deposits/v0/minimal-deposit-properties/1c2f78a1-26b8-4a40-a873-1073b9f3a56a" -> minimalDepositPropertiesDirV0
     )
 
     for ((src, target) <- bags)

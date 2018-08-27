@@ -76,11 +76,11 @@ class Deposit private(val baseDir: File,
     withDepositProperties(newProperties)
   }
 
+  // note that the bagId is immutable! hence there is withBagId and withoutBagId
   def bagId: UUID = properties.bagStore.bagId
 
   def isArchived: Option[Boolean] = properties.bagStore.archived
 
-  // TODO note that the bagId cannot be changed!
   def withIsArchived(isArchived: Boolean): Deposit = {
     val newProperties = properties.copy(
       bagStore = properties.bagStore.copy(
@@ -363,31 +363,39 @@ object Deposit {
 
   /**
    * Creates a new `nl.knaw.dans.bag.Deposit` with an empty `nl.knaw.dans.bag.DansBag` inside.
+   * The deposit will also be created on disk at path `[baseDir] / [bagId]`.
    *
-   * @param baseDir    the directory for the new Deposit
+   * @param baseDir    the directory in which the new Deposit is created
+   * @param bagId      the bagId for the `bag-dir` in this `nl.knaw.dans.bag.Deposit`, defaults to
+   *                   a random bagId
+   * @param bagName    the name of the bag to be created inside the Deposit, defaults to `"bag"`
    * @param algorithms the algorithms with which the checksums for the (payload/tag) files are
-   *                   calculated. If none are provided, SHA1 is used.
-   * @param bagInfo    the entries to be added to `bag-info.txt`
+   *                   calculated, defaults to ChecksumAlgorithm.SHA1
+   * @param bagInfo    the entries to be added to `bag-info.txt`, defaults to an empty `Map`
    * @param state      the state to be set in the `deposit.properties`' state.label
    * @param depositor  the depositor to be set in the `deposit.properties`' `depositor.userId`
-   * @param bagStore   the bagId for the `bag-dir` in this `nl.knaw.dans.bag.Deposit`
    * @return if successful, returns a `nl.knaw.dans.bag.Deposit` object representing the deposit
    *         located at `baseDir`, else returns an exception
    */
   def from(baseDir: File,
+           bagId: UUID = UUID.randomUUID(),
+           bagName: String = "bag",
            algorithms: Set[ChecksumAlgorithm] = Set(ChecksumAlgorithm.SHA1),
            bagInfo: Map[String, Seq[String]] = Map.empty,
            state: State,
-           depositor: Depositor,
-           bagStore: BagStore): Try[Deposit] = {
-    if (baseDir.exists)
-      Failure(new FileAlreadyExistsException(baseDir.toString))
+           depositor: Depositor): Try[Deposit] = {
+    lazy val depositDir = baseDir / bagId.toString
+
+    if (baseDir.notExists)
+      Failure(new NoSuchFileException(baseDir.toString))
+    else if (depositDir.exists)
+      Failure(new FileAlreadyExistsException(depositDir.toString(), null, "deposit needs to be created in this directory, but it already exists"))
     else
       for {
-        bag <- DansBag.empty(baseDir / bagStore.bagId.toString, algorithms, bagInfo)
-        properties = DepositProperties.from(state, depositor, bagStore)
-        _ <- properties.save(depositProperties(baseDir))
-      } yield new Deposit(baseDir, bag, properties)
+        bag <- DansBag.empty(depositDir / bagName, algorithms, bagInfo)
+        properties = DepositProperties.from(state, depositor, BagStore(bagId))
+        _ <- properties.save(depositProperties(depositDir))
+      } yield new Deposit(depositDir, bag, properties)
   }
 
   /**
@@ -395,34 +403,41 @@ object Deposit {
    * created in the `Deposit`, with the bag-it files, and the data files in the `data/` directory.
    * However, no `metadata/` files will be created. These have to be added separately.
    *
+   * The new deposit will be created in `[payloadDir] / [bagId]`, with a bag in it, with the same
+   * name as `payloadDir`.
+   *
    * @param payloadDir the directory containing the payload (data) files for the bag. The `Deposit`
    *                   will be created here, and the payload files will be moved to the `data/`
    *                   directory in the new `DansBag`
+   * @param bagId      the bagId for the `bag-dir` in this `nl.knaw.dans.bag.Deposit`, defaults to
+   *                   a random bagId
    * @param algorithms the algorithms with which the checksums for the (payload/tag) files are
    *                   calculated. If none provided SHA1 is used.
    * @param bagInfo    the entries to be added to `bag-info.txt`
    * @param state      the state to be set in the deposit.properties' state.label
    * @param depositor  the depositor to be set in the deposit.properties' depositor.userId
-   * @param bagStore   the BagStore containing the target bag-store and the bagId for the bag-dir in
-   *                   this Deposit
    * @return if successful, returns a `nl.knaw.dans.bag.Deposit` object representing the deposit
    *         located at `payloadDir` else returns an exception
    */
   def createFromData(payloadDir: File,
+                     bagId: UUID = UUID.randomUUID(),
                      algorithms: Set[ChecksumAlgorithm] = Set(ChecksumAlgorithm.SHA1),
                      bagInfo: Map[String, Seq[String]] = Map.empty,
                      state: State,
-                     depositor: Depositor,
-                     bagStore: BagStore): Try[Deposit] = {
+                     depositor: Depositor): Try[Deposit] = {
+    lazy val depositDir = payloadDir / bagId.toString
+
     if (payloadDir.notExists)
       Failure(new NoSuchFileException(payloadDir.toString))
+    else if (depositDir.exists)
+      Failure(new FileAlreadyExistsException(depositDir.toString(), null, "deposit needs to be created in this directory, but it already exists"))
     else
       for {
-        bagDir <- moveBag(payloadDir, bagStore.bagId)
+        bagDir <- moveBag(payloadDir, bagId)
         bag <- DansBag.createFromData(bagDir, algorithms, bagInfo)
-        properties = DepositProperties.from(state, depositor, bagStore)
-        _ <- properties.save(depositProperties(payloadDir))
-      } yield new Deposit(payloadDir, bag, properties)
+        properties = DepositProperties.from(state, depositor, BagStore(bagId))
+        _ <- properties.save(depositProperties(depositDir))
+      } yield new Deposit(depositDir, bag, properties)
   }
 
   /**
@@ -431,26 +446,30 @@ object Deposit {
    *
    * @param bagDir    the directory containing the bag. The `Deposit` will be created here, and the bag
    *                  will be moved to the bag directory within the deposit
+   * @param bagId     the bagId for the `bag-dir` in this `nl.knaw.dans.bag.Deposit`, defaults to
+   *                  a random bagId
    * @param state     the state to be set in the deposit.properties' state.label
    * @param depositor the depositor to be set in the deposit.properties' depositor.userId
-   * @param bagStore  the BagStore containing the target bag-store and the bagId for the bag-dir in
-   *                  this Deposit
    * @return if successful, returns a `nl.knaw.dans.bag.Deposit` object representing the deposit
    *         located at `bagDir`, else returns an exception
    */
   def createFromBag(bagDir: File,
+                    bagId: UUID = UUID.randomUUID(),
                     state: State,
-                    depositor: Depositor,
-                    bagStore: BagStore): Try[Deposit] = {
+                    depositor: Depositor): Try[Deposit] = {
+    lazy val depositDir = bagDir / bagId.toString
+
     if (bagDir.notExists)
       Failure(new NoSuchFileException(bagDir.toString()))
+    else if (depositDir.exists)
+      Failure(new FileAlreadyExistsException(depositDir.toString(), null, "deposit needs to be created in this directory, but it already exists"))
     else
       for {
-        newBagDir <- moveBag(bagDir, bagStore.bagId)
+        newBagDir <- moveBag(bagDir, bagId)
         bag <- DansBag.read(newBagDir)
-        properties = DepositProperties.from(state, depositor, bagStore)
-        _ <- properties.save(depositProperties(bagDir))
-      } yield new Deposit(bagDir, bag, properties)
+        properties = DepositProperties.from(state, depositor, BagStore(bagId))
+        _ <- properties.save(depositProperties(depositDir))
+      } yield new Deposit(depositDir, bag, properties)
   }
 
   /**
@@ -477,16 +496,16 @@ object Deposit {
   implicit def depositAsFile(deposit: Deposit): File = deposit.baseDir
 
   private def moveBag(payloadDir: File, bagId: UUID): Try[File] = Try {
-    val bagDir = payloadDir / bagId.toString createDirectory()
+    val depositDir = payloadDir / bagId.toString
+    val bagDir = depositDir / payloadDir.name createDirectories()
     for (payloadFile <- payloadDir.list
-         if payloadFile != bagDir)
+         if payloadFile != depositDir)
       payloadFile.moveTo(bagDir / payloadDir.relativize(payloadFile).toString)
 
     bagDir
   }
 
   private def findBagDir(baseDir: File): Try[File] = {
-    // due to backwards compatibility, we cannot implement this using the bagId from deposit.properties
     baseDir.list.filter(_.isDirectory).toList match {
       case dir :: Nil => Success(dir)
       case Nil => Failure(new IllegalArgumentException(s"$baseDir is not a deposit: it contains no directories"))

@@ -39,11 +39,15 @@
         <tag>HEAD</tag>
     </scm>
 
+    <properties>
+        <dans.bag.lib.version>1.0.0-beta-2</dans.bag.lib.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>nl.knaw.dans.lib</groupId>
             <artifactId>dans-bag-lib_2.12</artifactId>
-            <version>1.0.0-beta-2</version>
+            <version>${dans.bag.lib.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.pathikrit</groupId>

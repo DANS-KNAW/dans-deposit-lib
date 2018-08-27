@@ -26,7 +26,6 @@ import scala.language.implicitConversions
 import scala.util.Failure
 
 class DepositPropertiesSpec extends TestSupportFixture
-  with FileSystemSupport
   with TestDeposits
   with FixDateTimeNow {
 
