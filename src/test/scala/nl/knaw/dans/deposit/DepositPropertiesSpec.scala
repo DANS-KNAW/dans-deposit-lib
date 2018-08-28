@@ -18,7 +18,7 @@ package nl.knaw.dans.deposit
 import java.nio.file.NoSuchFileException
 import java.util.UUID
 
-import nl.knaw.dans.deposit.fixtures.{ FileSystemSupport, FixDateTimeNow, TestDeposits, TestSupportFixture }
+import nl.knaw.dans.deposit.fixtures.{ FixDateTimeNow, TestDeposits, TestSupportFixture }
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{ DateTime, DateTimeUtils, DateTimeZone }
 
@@ -173,19 +173,19 @@ class DepositPropertiesSpec extends TestSupportFixture
     )
 
     val file = simpleDepositDirV0 / "deposit2.properties"
-    file.toJava shouldNot exist
+    file shouldNot exist
 
     newProps.save(file)
-    file.toJava should exist
+    file should exist
 
     val newProps2: DepositProperties = DepositProperties.read(file)
     newProps2 shouldBe newProps
 
     val file2 = simpleDepositDirV0 / "deposit3.properties"
-    file2.toJava shouldNot exist
+    file2 shouldNot exist
 
     newProps2.save(file2)
-    file2.toJava should exist
+    file2 should exist
 
     file.contentAsString shouldBe file2.contentAsString
   }

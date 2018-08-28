@@ -48,15 +48,15 @@ class DepositSpec extends TestSupportFixture
     val depositDir = baseDir / bagId.toString
     val bagDir = depositDir / bagName
 
-    baseDir.toJava should exist
-    depositDir.toJava shouldNot exist
-    bagDir.toJava shouldNot exist
+    baseDir should exist
+    depositDir shouldNot exist
+    bagDir shouldNot exist
 
     inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        baseDir.toJava should exist
-        depositDir.toJava should exist
-        bagDir.toJava should exist
+        baseDir should exist
+        depositDir should exist
+        bagDir should exist
         deposit.bag.baseDir shouldBe bagDir
     }
   }
@@ -93,7 +93,7 @@ class DepositSpec extends TestSupportFixture
 
     inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        (deposit.baseDir / Deposit.depositPropertiesName).toJava should exist
+        deposit.baseDir / Deposit.depositPropertiesName should exist
     }
   }
 
@@ -175,12 +175,12 @@ class DepositSpec extends TestSupportFixture
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
 
-    baseDir.toJava shouldNot exist
+    baseDir shouldNot exist
 
     inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Failure(e: NoSuchFileException) =>
         e should have message baseDir.toString()
-        baseDir.toJava shouldNot exist
+        baseDir shouldNot exist
     }
   }
 
@@ -195,7 +195,7 @@ class DepositSpec extends TestSupportFixture
     val bagId = UUID.randomUUID()
 
     val depositDir = baseDir / bagId.toString createDirectory()
-    depositDir.toJava should exist
+    depositDir should exist
 
     inside(Deposit.from(baseDir, bagId, bagName, algorithms, bagInfo, state, depositor)) {
       case Failure(e: FileAlreadyExistsException) =>
@@ -220,21 +220,21 @@ class DepositSpec extends TestSupportFixture
     val bagId = UUID.randomUUID()
 
     val depositDir = baseDir / bagId.toString
-    depositDir.toJava shouldNot exist
+    depositDir shouldNot exist
     val bagDir = depositDir / baseDir.name
-    bagDir.toJava shouldNot exist
+    bagDir shouldNot exist
     val depositProperties = depositDir / Deposit.depositPropertiesName
-    depositProperties.toJava shouldNot exist
+    depositProperties shouldNot exist
 
     inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        depositDir.toJava should exist
+        depositDir should exist
         deposit.baseDir shouldBe depositDir
 
-        bagDir.toJava should exist
+        bagDir should exist
         deposit.bag.baseDir shouldBe bagDir
 
-        depositProperties.toJava should exist
+        depositProperties should exist
 
         deposit.baseDir.list.toList should contain only (
           bagDir,
@@ -256,7 +256,7 @@ class DepositSpec extends TestSupportFixture
       case Success(deposit) =>
         deposit.baseDir shouldBe baseDir / bagId.toString
         val bagDir = baseDir / bagId.toString / baseDir.name
-        bagDir.toJava should exist
+        bagDir should exist
         val dataDir = bagDir / "data"
         dataDir.listRecursively.filter(_.isRegularFile).toList should contain only(
           dataDir / baseDir.relativize(file1).toString,
@@ -275,7 +275,7 @@ class DepositSpec extends TestSupportFixture
 
     inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Success(deposit) =>
-        (deposit.baseDir / Deposit.depositPropertiesName).toJava should exist
+        deposit.baseDir / Deposit.depositPropertiesName should exist
     }
   }
 
@@ -358,7 +358,7 @@ class DepositSpec extends TestSupportFixture
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
 
-    baseDir.toJava shouldNot exist
+    baseDir shouldNot exist
 
     inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Failure(e: NoSuchFileException) =>
@@ -375,7 +375,7 @@ class DepositSpec extends TestSupportFixture
     val bagId = UUID.randomUUID()
 
     val depositDir = baseDir / bagId.toString createDirectory()
-    depositDir.toJava should exist
+    depositDir should exist
 
     inside(Deposit.createFromData(baseDir, bagId, algorithms, bagInfo, state, depositor)) {
       case Failure(e: FileAlreadyExistsException) =>
@@ -390,21 +390,21 @@ class DepositSpec extends TestSupportFixture
     val bagId = UUID.randomUUID()
 
     val depositDir = src / bagId.toString
-    depositDir.toJava shouldNot exist
+    depositDir shouldNot exist
     val bagDir = depositDir / src.name
-    bagDir.toJava shouldNot exist
+    bagDir shouldNot exist
     val depositProperties = depositDir / Deposit.depositPropertiesName
-    depositProperties.toJava shouldNot exist
+    depositProperties shouldNot exist
 
     inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
-        depositDir.toJava should exist
+        depositDir should exist
         deposit.baseDir shouldBe depositDir
 
-        bagDir.toJava should exist
+        bagDir should exist
         deposit.bag.baseDir shouldBe bagDir
 
-        depositProperties.toJava should exist
+        depositProperties should exist
 
         deposit.baseDir.list.toList should contain only (
           bagDir,
@@ -423,7 +423,7 @@ class DepositSpec extends TestSupportFixture
     inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
         val bagDir = deposit.baseDir / src.name
-        bagDir.toJava should exist
+        bagDir should exist
         bagDir.listRecursively.filter(_.isRegularFile).toList should contain only(
           bagDir / "data" / "x",
           bagDir / "data" / "y",
@@ -449,7 +449,7 @@ class DepositSpec extends TestSupportFixture
 
     inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Success(deposit) =>
-        (deposit.baseDir / Deposit.depositPropertiesName).toJava should exist
+        deposit.baseDir / Deposit.depositPropertiesName should exist
     }
   }
 
@@ -540,7 +540,7 @@ class DepositSpec extends TestSupportFixture
     val depositor = Depositor("ikke")
     val bagId = UUID.randomUUID()
 
-    src.toJava shouldNot exist
+    src shouldNot exist
 
     inside(Deposit.createFromBag(src, bagId, state, depositor)) {
       case Failure(e: NoSuchFileException) =>
@@ -586,9 +586,9 @@ class DepositSpec extends TestSupportFixture
     val depositDir = simpleDepositDirV0
     val bagDir = depositDir / "bag"
 
-    bagDir.toJava should exist
+    bagDir should exist
     bagDir.delete()
-    bagDir.toJava shouldNot exist
+    bagDir shouldNot exist
 
     inside(Deposit.read(depositDir)) {
       case Failure(e: IllegalArgumentException) =>
@@ -950,7 +950,7 @@ class DepositSpec extends TestSupportFixture
     val dest = relativeDest(deposit.bag.data)
     val sha1Checksum = newFile.sha1.toLowerCase
 
-    dest.toJava shouldNot exist
+    dest shouldNot exist
     deposit.bag.payloadManifestAlgorithms should contain only ChecksumAlgorithm.SHA1
     deposit.bag.payloadManifests(ChecksumAlgorithm.SHA1) shouldNot contain key dest
 
@@ -959,7 +959,7 @@ class DepositSpec extends TestSupportFixture
       .flatMap(_.addPayloadManifestAlgorithm(ChecksumAlgorithm.MD5)) shouldBe a[Success[_]]
 
     // without saving, the new file should be added to the bag...
-    dest.toJava should exist
+    dest should exist
     // ... and all object structures should be updated accordingly...
     deposit.bag.payloadManifestAlgorithms should contain only(ChecksumAlgorithm.SHA1, ChecksumAlgorithm.MD5)
     deposit.bag.payloadManifests(ChecksumAlgorithm.SHA1) should contain key dest
@@ -968,14 +968,14 @@ class DepositSpec extends TestSupportFixture
     (deposit.bag.baseDir / "manifest-sha1.txt").contentAsString should (
       not include deposit.bag.baseDir.relativize(dest).toString and
         not include sha1Checksum)
-    (deposit.bag.baseDir / "manifest-md5.txt").toJava shouldNot exist
+    deposit.bag.baseDir / "manifest-md5.txt" shouldNot exist
 
     deposit.save() shouldBe a[Success[_]]
 
     (deposit.bag.baseDir / "manifest-sha1.txt").contentAsString should (
       include(deposit.bag.baseDir.relativize(dest).toString) and
         include(sha1Checksum))
-    (deposit.bag.baseDir / "manifest-md5.txt").toJava should exist
+    deposit.bag.baseDir / "manifest-md5.txt" should exist
   }
 
   it should "write changes made to the DepositProperties to the deposit on file system" in {
