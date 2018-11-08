@@ -60,7 +60,9 @@ case class DepositProperties(creation: Creation = Creation(),
       setProperty(bagStoreBagId, bagStore.bagId)
       bagStore.archivedString.foreach(setProperty(bagStoreArchived, _))
 
-      identifier.doi.foreach(setProperty(doiIdentifier, _))
+      identifier.doi.value.foreach(setProperty(doiIdentifier, _))
+      identifier.doi.registeredString.foreach(setProperty(doiRegistered, _))
+      identifier.fedora.value.foreach(setProperty(fedoraIdentifier, _))
 
       curation.dataManager.userId.foreach(setProperty(dataManagerUserId, _))
       curation.dataManager.email.foreach(setProperty(datamanagerEmail, _))
@@ -88,6 +90,8 @@ object DepositProperties {
   val bagStoreBagId         = "bag-store.bag-id"
   val bagStoreArchived      = "bag-store.archived"
   val doiIdentifier         = "identifier.doi"
+  val doiRegistered         = "identifier.doi.registered"
+  val fedoraIdentifier      = "identifier.fedora"
   val dataManagerUserId     = "curation.datamanager.userId"
   val datamanagerEmail      = "curation.datamanager.email"
   val isNewVersion          = "curation.is-new-version"
@@ -171,8 +175,14 @@ object DepositProperties {
         bagId = bagStoreBagIdValue,
         archived = properties.getString(bagStoreArchived)
       ),
-      identifier = new Identifier(
-        doi = properties.getString(doiIdentifier)
+      identifier = Identifier(
+        doi = new Doi(
+          doiValue = properties.getString(doiIdentifier),
+          doiRegistered = properties.getString(doiRegistered),
+        ),
+        fedora = new FedoraId(
+          value = properties.getString(fedoraIdentifier),
+        ),
       ),
       curation = new Curation(
         userId = properties.getString(dataManagerUserId),
@@ -223,10 +233,21 @@ case class State(label: StateLabel, description: String) {
 
 case class Depositor(userId: String)
 
-case class Identifier(doi: Option[String] = None) {
-  def this(doi: String) = {
-    this(Option(doi))
+case class Identifier(doi: Doi = Doi(), fedora: FedoraId = FedoraId())
+
+case class FedoraId(value: Option[String] = None) {
+  def this(value: String) = {
+    this(Option(value))
   }
+}
+
+case class Doi(value: Option[String] = None,
+               registered: Option[Boolean] = Some(false)) {
+  def this(doiValue: String, doiRegistered: String) = {
+    this(Option(doiValue), Option(doiRegistered).map(BooleanUtils.toBoolean))
+  }
+
+  def registeredString: Option[String] = registered.map(BooleanUtils.toStringYesNo)
 }
 
 case class BagStore(bagId: UUID,

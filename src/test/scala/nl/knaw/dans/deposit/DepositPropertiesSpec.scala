@@ -46,7 +46,9 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.bagStore.bagId shouldBe bagId
     props.bagStore.isArchived shouldBe false
 
-    props.identifier.doi shouldBe empty
+    props.identifier.doi.value shouldBe empty
+    props.identifier.doi.registered.value shouldBe false
+    props.identifier.fedora.value shouldBe empty
 
     props.curation.dataManager.email shouldBe empty
     props.curation.dataManager.userId shouldBe empty
@@ -77,7 +79,9 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.bagStore.bagId shouldBe UUID.fromString("1c2f78a1-26b8-4a40-a873-1073b9f3a56a")
     props.bagStore.isArchived shouldBe true
 
-    props.identifier.doi.value shouldBe "some-random-doi"
+    props.identifier.doi.value.value shouldBe "some-random-doi"
+    props.identifier.doi.registered.value shouldBe true
+    props.identifier.fedora.value.value shouldBe "some-random-fedora-identifier"
 
     props.curation.dataManager.email.value shouldBe "FILL.IN.YOUR@VALID-EMAIL.NL"
     props.curation.dataManager.userId.value shouldBe "myadmin"
@@ -105,7 +109,9 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.bagStore.bagId shouldBe UUID.fromString("1c2f78a1-26b8-4a40-a873-1073b9f3a56a")
     props.bagStore.isArchived shouldBe false
 
-    props.identifier.doi shouldBe empty
+    props.identifier.doi.value shouldBe empty
+    props.identifier.doi.registered shouldBe empty
+    props.identifier.fedora.value shouldBe empty
 
     props.curation.dataManager.email shouldBe empty
     props.curation.dataManager.userId shouldBe empty

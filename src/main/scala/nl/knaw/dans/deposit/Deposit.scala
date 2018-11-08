@@ -101,18 +101,80 @@ class Deposit private(val baseDir: File,
     withDepositProperties(newProperties)
   }
 
-  def doi: Option[String] = properties.identifier.doi
+  def doi: Option[String] = properties.identifier.doi.value
 
   def withDoi(doi: String): Deposit = {
     val newProperties = properties.copy(
-      identifier = Identifier(Option(doi))
+      identifier = properties.identifier.copy(
+        doi = properties.identifier.doi.copy(
+          value = Option(doi),
+        ),
+      ),
     )
 
     withDepositProperties(newProperties)
   }
 
   def withoutDoi: Deposit = {
-    val newProperties = properties.copy(identifier = Identifier(Option.empty))
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        doi = properties.identifier.doi.copy(
+          value = Option.empty,
+        ),
+      ),
+    )
+
+    withDepositProperties(newProperties)
+  }
+
+  def isDoiRegistered: Option[Boolean] = properties.identifier.doi.registered
+
+  def withIsDoiRegistered(isDoiRegistered: Boolean): Deposit = {
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        doi = properties.identifier.doi.copy(
+          registered = Option(isDoiRegistered),
+        ),
+      ),
+    )
+
+    withDepositProperties(newProperties)
+  }
+
+  def withoutIsDoiRegistered: Deposit = {
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        doi = properties.identifier.doi.copy(
+          registered = Option.empty,
+        ),
+      ),
+    )
+
+    withDepositProperties(newProperties)
+  }
+
+  def fedoraId: Option[String] = properties.identifier.fedora.value
+
+  def withFedoraId(fedoraId: String): Deposit = {
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        fedora = properties.identifier.fedora.copy(
+          value = Option(fedoraId),
+        ),
+      ),
+    )
+
+    withDepositProperties(newProperties)
+  }
+
+  def withoutFedoraId: Deposit = {
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        fedora = properties.identifier.fedora.copy(
+          value = Option.empty,
+        ),
+      ),
+    )
 
     withDepositProperties(newProperties)
   }

@@ -115,6 +115,7 @@ class DepositSpec extends TestSupportFixture
           DepositProperties.stateDescription,
           DepositProperties.bagStoreBagId,
           DepositProperties.depositorUserId,
+          DepositProperties.doiRegistered,
         )
 
         props.getString(DepositProperties.creationTimestamp) shouldBe fixedDateTimeNow.toString(ISODateTimeFormat.dateTime())
@@ -122,6 +123,7 @@ class DepositSpec extends TestSupportFixture
         props.getString(DepositProperties.stateDescription) shouldBe state.description
         props.getString(DepositProperties.bagStoreBagId) shouldBe bagId.toString
         props.getString(DepositProperties.depositorUserId) shouldBe depositor.userId
+        props.getString(DepositProperties.doiRegistered) shouldBe "no"
     }
   }
 
@@ -296,6 +298,7 @@ class DepositSpec extends TestSupportFixture
           DepositProperties.stateDescription,
           DepositProperties.bagStoreBagId,
           DepositProperties.depositorUserId,
+          DepositProperties.doiRegistered,
         )
 
         props.getString(DepositProperties.creationTimestamp) shouldBe fixedDateTimeNow.toString(ISODateTimeFormat.dateTime())
@@ -303,6 +306,7 @@ class DepositSpec extends TestSupportFixture
         props.getString(DepositProperties.stateDescription) shouldBe state.description
         props.getString(DepositProperties.bagStoreBagId) shouldBe bagId.toString
         props.getString(DepositProperties.depositorUserId) shouldBe depositor.userId
+        props.getString(DepositProperties.doiRegistered) shouldBe "no"
     }
   }
 
@@ -468,6 +472,7 @@ class DepositSpec extends TestSupportFixture
           DepositProperties.stateDescription,
           DepositProperties.bagStoreBagId,
           DepositProperties.depositorUserId,
+          DepositProperties.doiRegistered,
         )
 
         props.getString(DepositProperties.creationTimestamp) shouldBe fixedDateTimeNow.toString(ISODateTimeFormat.dateTime())
@@ -475,6 +480,7 @@ class DepositSpec extends TestSupportFixture
         props.getString(DepositProperties.stateDescription) shouldBe state.description
         props.getString(DepositProperties.bagStoreBagId) shouldBe bagId.toString
         props.getString(DepositProperties.depositorUserId) shouldBe depositor.userId
+        props.getString(DepositProperties.doiRegistered) shouldBe "no"
     }
   }
 
@@ -721,6 +727,48 @@ class DepositSpec extends TestSupportFixture
     val resultDeposit = deposit.withoutDoi
 
     resultDeposit.doi shouldBe empty
+  }
+
+  "isDoiRegistered" should "return whether the doi is registered" in {
+    val deposit = simpleDepositV0()
+
+    deposit.isDoiRegistered.value shouldBe true
+  }
+
+  "withIsDoiRegistered" should "change the registered flag for the doi and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withIsDoiRegistered(false)
+
+    resultDeposit.isDoiRegistered.value shouldBe false
+  }
+
+  "withoutIsDoiRegistered" should "remove the registered flag for the doi and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withoutIsDoiRegistered
+
+    resultDeposit.isDoiRegistered shouldBe empty
+  }
+
+  "fedoraId" should "return the fedora identifier of this deposit from deposit.properties" in {
+    val deposit = simpleDepositV0()
+
+    deposit.fedoraId.value shouldBe "some-random-fedora-identifier"
+  }
+
+  "withFedoraId" should "change the fedora identifier of this deposit and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val fd = "other-fedora-identifier"
+
+    val resultDeposit = deposit.withFedoraId(fd)
+
+    resultDeposit.fedoraId.value shouldBe fd
+  }
+
+  "withoutFedoraId" should "remove the fedora identifier of this deposit and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withoutFedoraId
+
+    resultDeposit.fedoraId shouldBe empty
   }
 
   "dataManagerId" should "return the datamanager's id from deposit.properties" in {
