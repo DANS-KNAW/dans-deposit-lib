@@ -215,14 +215,15 @@ case class Creation(timestamp: DateTime = DateTime.now) {
 object StateLabel extends Enumeration {
   type StateLabel = Value
 
+  val ARCHIVED: StateLabel = Value
   val DRAFT: StateLabel = Value
+  val FAILED: StateLabel = Value
   val FINALIZING: StateLabel = Value
   val INVALID: StateLabel = Value
-  val SUBMITTED: StateLabel = Value
   val REJECTED: StateLabel = Value
-  val FAILED: StateLabel = Value
   val STALLED: StateLabel = Value
-  val ARCHIVED: StateLabel = Value
+  val SUBMITTED: StateLabel = Value
+  val UPLOADED: StateLabel = Value
 }
 
 case class State(label: StateLabel, description: String) {
