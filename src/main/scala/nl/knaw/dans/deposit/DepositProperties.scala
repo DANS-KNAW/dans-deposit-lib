@@ -95,7 +95,7 @@ object DepositProperties {
   val bagStoreBagId         = "bag-store.bag-id"
   val bagStoreArchived      = "bag-store.archived"
   val doiIdentifier         = "identifier.doi"
-  val doiRegistered         = "identifier.doi.registered"
+  val doiRegistered         = "identifier.dans-doi.registered"
   val fedoraIdentifier      = "identifier.fedora"
   val dataManagerUserId     = "curation.datamanager.userId"
   val datamanagerEmail      = "curation.datamanager.email"
