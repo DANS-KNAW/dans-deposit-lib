@@ -679,6 +679,27 @@ class DepositSpec extends TestSupportFixture
     resultDeposit.depositor shouldBe depositor
   }
 
+  "currentIngestStep" should "return the current ingest step property from deposit.properties" in {
+    val deposit = simpleDepositV0()
+
+    deposit.currentIngestStep.value shouldBe CurrentIngestStep.FEDORA
+  }
+
+  "withCurrentIngestStep" should "change the current ingest step property and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+
+    val resultDeposit = deposit.withCurrentIngestStep(CurrentIngestStep.BAGSTORE)
+
+    resultDeposit.currentIngestStep.value shouldBe CurrentIngestStep.BAGSTORE
+  }
+
+  "withoutCurrentIngestStep" should "remove the current ingest step property and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withoutCurrentIngestStep
+
+    resultDeposit.currentIngestStep shouldBe empty
+  }
+
   "bagId" should "return the bagId of the deposit from deposit.properties" in {
     val deposit = simpleDepositV0()
 

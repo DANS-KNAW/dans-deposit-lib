@@ -19,6 +19,7 @@ import java.nio.file.NoSuchFileException
 import java.util.UUID
 
 import better.files.File
+import nl.knaw.dans.deposit.CurrentIngestStep.CurrentIngestStep
 import nl.knaw.dans.deposit.DepositProperties.{ stateDescription, _ }
 import nl.knaw.dans.deposit.SpringfieldPlayMode.SpringfieldPlayMode
 import nl.knaw.dans.deposit.StageState.StageState
@@ -33,6 +34,7 @@ import scala.util.{ Failure, Try }
 case class DepositProperties(creation: Creation = Creation(),
                              state: State,
                              depositor: Depositor,
+                             ingest: Ingest = Ingest(),
                              bagStore: BagStore,
                              identifier: Identifier = Identifier(),
                              curation: Curation = Curation(),
@@ -56,6 +58,8 @@ case class DepositProperties(creation: Creation = Creation(),
       setProperty(stateDescription, state.description)
 
       setProperty(depositorUserId, depositor.userId)
+
+      ingest.currentStep.foreach(step => setProperty(ingestCurrentStep, step.toString))
 
       setProperty(bagStoreBagId, bagStore.bagId)
       bagStore.archivedString.foreach(setProperty(bagStoreArchived, _))
@@ -87,6 +91,7 @@ object DepositProperties {
   val stateLabel            = "state.label"
   val stateDescription      = "state.description"
   val depositorUserId       = "depositor.userId"
+  val ingestCurrentStep     = "deposit.ingest.current-step"
   val bagStoreBagId         = "bag-store.bag-id"
   val bagStoreArchived      = "bag-store.archived"
   val doiIdentifier         = "identifier.doi"
@@ -171,6 +176,9 @@ object DepositProperties {
       depositor = Depositor(
         userId = depositorUserIdValue
       ),
+      ingest = new Ingest(
+        currentStep = properties.getString(ingestCurrentStep),
+      ),
       bagStore = new BagStore(
         bagId = bagStoreBagIdValue,
         archived = properties.getString(bagStoreArchived)
@@ -233,6 +241,24 @@ case class State(label: StateLabel, description: String) {
 }
 
 case class Depositor(userId: String)
+
+object CurrentIngestStep extends Enumeration {
+  type CurrentIngestStep = Value
+
+  val VALIDATE: CurrentIngestStep = Value
+  val PID_GENERATOR: CurrentIngestStep = Value
+  val FEDORA: CurrentIngestStep = Value
+  val SPRINGFIELD: CurrentIngestStep = Value
+  val BAGSTORE: CurrentIngestStep = Value
+  val BAGINDEX: CurrentIngestStep = Value
+  val SOLR4FILES: CurrentIngestStep = Value
+}
+
+case class Ingest(currentStep: Option[CurrentIngestStep] = None) {
+  def this(currentStep: String) = {
+    this(Option(currentStep).map(CurrentIngestStep.withName))
+  }
+}
 
 case class Identifier(doi: Doi = Doi(), fedora: FedoraId = FedoraId())
 

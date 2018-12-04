@@ -43,6 +43,8 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     props.depositor.userId shouldBe depositor.userId
 
+    props.ingest.currentStep shouldBe empty
+
     props.bagStore.bagId shouldBe bagId
     props.bagStore.isArchived shouldBe false
 
@@ -76,6 +78,8 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     props.depositor.userId shouldBe "myuser"
 
+    props.ingest.currentStep.value shouldBe CurrentIngestStep.FEDORA
+
     props.bagStore.bagId shouldBe UUID.fromString("1c2f78a1-26b8-4a40-a873-1073b9f3a56a")
     props.bagStore.isArchived shouldBe true
 
@@ -105,6 +109,8 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.state.description shouldBe "Deposit is valid, and ready for post-submission processing"
 
     props.depositor.userId shouldBe "myuser"
+
+    props.ingest.currentStep shouldBe empty
 
     props.bagStore.bagId shouldBe UUID.fromString("1c2f78a1-26b8-4a40-a873-1073b9f3a56a")
     props.bagStore.isArchived shouldBe false
