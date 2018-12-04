@@ -161,6 +161,12 @@
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="CurrentIngestStep$.html" title=""></a>
+                        <a href="CurrentIngestStep$.html" title="">
+                          CurrentIngestStep
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="DataManager.html" title=""></a>
                         <a href="DataManager.html" title="">
                           DataManager
@@ -200,6 +206,12 @@
                         <a class="class" href="Identifier.html" title=""></a>
                         <a href="Identifier.html" title="">
                           Identifier
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Ingest.html" title=""></a>
+                        <a href="Ingest.html" title="">
+                          Ingest
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
@@ -404,7 +416,7 @@
       <span class="symbol">
         <a title="" href="DepositProperties.html">
               <span class="name">DepositProperties</span>
-            </a><span class="params">(<span name="creation">creation: <a href="Creation.html" class="extype" name="nl.knaw.dans.deposit.Creation">Creation</a> = <span class="symbol">Creation()</span></span>, <span name="state">state: <a href="State.html" class="extype" name="nl.knaw.dans.deposit.State">State</a></span>, <span name="depositor">depositor: <a href="Depositor.html" class="extype" name="nl.knaw.dans.deposit.Depositor">Depositor</a></span>, <span name="bagStore">bagStore: <a href="BagStore.html" class="extype" name="nl.knaw.dans.deposit.BagStore">BagStore</a></span>, <span name="identifier">identifier: <a href="Identifier.html" class="extype" name="nl.knaw.dans.deposit.Identifier">Identifier</a> = <span class="symbol">Identifier()</span></span>, <span name="curation">curation: <a href="Curation.html" class="extype" name="nl.knaw.dans.deposit.Curation">Curation</a> = <span class="symbol">Curation()</span></span>, <span name="springfield">springfield: <a href="Springfield.html" class="extype" name="nl.knaw.dans.deposit.Springfield">Springfield</a> = <span class="symbol">Springfield()</span></span>, <span name="staged">staged: <a href="Staged.html" class="extype" name="nl.knaw.dans.deposit.Staged">Staged</a> = <span class="symbol">Staged()</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+            </a><span class="params">(<span name="creation">creation: <a href="Creation.html" class="extype" name="nl.knaw.dans.deposit.Creation">Creation</a> = <span class="symbol">Creation()</span></span>, <span name="state">state: <a href="State.html" class="extype" name="nl.knaw.dans.deposit.State">State</a></span>, <span name="depositor">depositor: <a href="Depositor.html" class="extype" name="nl.knaw.dans.deposit.Depositor">Depositor</a></span>, <span name="ingest">ingest: <a href="Ingest.html" class="extype" name="nl.knaw.dans.deposit.Ingest">Ingest</a> = <span class="symbol">Ingest()</span></span>, <span name="bagStore">bagStore: <a href="BagStore.html" class="extype" name="nl.knaw.dans.deposit.BagStore">BagStore</a></span>, <span name="identifier">identifier: <a href="Identifier.html" class="extype" name="nl.knaw.dans.deposit.Identifier">Identifier</a> = <span class="symbol">Identifier()</span></span>, <span name="curation">curation: <a href="Curation.html" class="extype" name="nl.knaw.dans.deposit.Curation">Curation</a> = <span class="symbol">Curation()</span></span>, <span name="springfield">springfield: <a href="Springfield.html" class="extype" name="nl.knaw.dans.deposit.Springfield">Springfield</a> = <span class="symbol">Springfield()</span></span>, <span name="staged">staged: <a href="Staged.html" class="extype" name="nl.knaw.dans.deposit.Staged">Staged</a> = <span class="symbol">Staged()</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -480,6 +492,24 @@
       </span>
       
       
+    </li><li name="nl.knaw.dans.deposit.Ingest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IngestextendsProductwithSerializable"></a><a id="Ingest:Ingest"></a>
+      <span class="permalink">
+      <a href="../../../../nl/knaw/dans/deposit/index.html#IngestextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Ingest.html">
+              <span class="name">Ingest</span>
+            </a><span class="params">(<span name="currentStep">currentStep: <span class="extype" name="scala.Option">Option</span>[<a href="CurrentIngestStep$.html#CurrentIngestStep=nl.knaw.dans.deposit.CurrentIngestStep.Value" class="extmbr" name="nl.knaw.dans.deposit.CurrentIngestStep.CurrentIngestStep">CurrentIngestStep</a>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="nl.knaw.dans.deposit.Springfield" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SpringfieldextendsProductwithSerializable"></a><a id="Springfield:Springfield"></a>
       <span class="permalink">
@@ -542,7 +572,25 @@
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="nl.knaw.dans.deposit.Deposit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="nl.knaw.dans.deposit.CurrentIngestStep" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CurrentIngestStep"></a><a id="CurrentIngestStep:CurrentIngestStep"></a>
+      <span class="permalink">
+      <a href="../../../../nl/knaw/dans/deposit/index.html#CurrentIngestStep" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="CurrentIngestStep$.html">
+              <span class="name">CurrentIngestStep</span>
+            </a><span class="result"> extends <span class="extype" name="scala.Enumeration">Enumeration</span></span>
+      </span>
+      
+      
+    </li><li name="nl.knaw.dans.deposit.Deposit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Deposit"></a><a id="Deposit:Deposit"></a>
       <span class="permalink">
       <a href="../../../../nl/knaw/dans/deposit/index.html#Deposit" title="Permalink">
