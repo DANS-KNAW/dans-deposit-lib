@@ -145,6 +145,12 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="nl.knaw.dans">dans</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="Action$.html" title=""></a>
+                        <a href="Action$.html" title="">
+                          Action
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="BagStore.html" title=""></a>
                         <a href="BagStore.html" title="">
                           BagStore
@@ -274,7 +280,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Doi</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="registered">registered: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">Some(false)</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Doi</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="registered">registered: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">Some(false)</span></span>, <span name="action">action: <span class="extype" name="scala.Option">Option</span>[<a href="Action$.html#Action=nl.knaw.dans.deposit.Action.Value" class="extmbr" name="nl.knaw.dans.deposit.Action.Action">Action</a>] = <span class="symbol"><span class="name"><a href="../../../index.html">Some(create)</a></span></span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -330,9 +336,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="nl.knaw.dans.deposit.Doi#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(doiValue:String,doiRegistered:String):nl.knaw.dans.deposit.Doi"></a><a id="&lt;init&gt;:Doi"></a>
+      <a id="&lt;init&gt;(doiValue:String,doiRegistered:String,action:String):nl.knaw.dans.deposit.Doi"></a><a id="&lt;init&gt;:Doi"></a>
       <span class="permalink">
-      <a href="../../../../nl/knaw/dans/deposit/Doi.html#&lt;init&gt;(doiValue:String,doiRegistered:String):nl.knaw.dans.deposit.Doi" title="Permalink">
+      <a href="../../../../nl/knaw/dans/deposit/Doi.html#&lt;init&gt;(doiValue:String,doiRegistered:String,action:String):nl.knaw.dans.deposit.Doi" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -341,14 +347,14 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Doi</span><span class="params">(<span name="doiValue">doiValue: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="doiRegistered">doiRegistered: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+        <span class="name">Doi</span><span class="params">(<span name="doiValue">doiValue: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="doiRegistered">doiRegistered: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="action">action: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       
       
     </li><li name="nl.knaw.dans.deposit.Doi#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(value:Option[String],registered:Option[Boolean]):nl.knaw.dans.deposit.Doi"></a><a id="&lt;init&gt;:Doi"></a>
+      <a id="&lt;init&gt;(value:Option[String],registered:Option[Boolean],action:Option[nl.knaw.dans.deposit.Action.Action]):nl.knaw.dans.deposit.Doi"></a><a id="&lt;init&gt;:Doi"></a>
       <span class="permalink">
-      <a href="../../../../nl/knaw/dans/deposit/Doi.html#&lt;init&gt;(value:Option[String],registered:Option[Boolean]):nl.knaw.dans.deposit.Doi" title="Permalink">
+      <a href="../../../../nl/knaw/dans/deposit/Doi.html#&lt;init&gt;(value:Option[String],registered:Option[Boolean],action:Option[nl.knaw.dans.deposit.Action.Action]):nl.knaw.dans.deposit.Doi" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -357,7 +363,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Doi</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="registered">registered: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">Some(false)</span></span>)</span>
+        <span class="name">Doi</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>, <span name="registered">registered: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Boolean">Boolean</span>] = <span class="symbol">Some(false)</span></span>, <span name="action">action: <span class="extype" name="scala.Option">Option</span>[<a href="Action$.html#Action=nl.knaw.dans.deposit.Action.Value" class="extmbr" name="nl.knaw.dans.deposit.Action.Action">Action</a>] = <span class="symbol"><span class="name"><a href="../../../index.html">Some(create)</a></span></span></span>)</span>
       </span>
       
       
@@ -419,6 +425,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="nl.knaw.dans.deposit.Doi#action" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="action:Option[nl.knaw.dans.deposit.Action.Action]"></a><a id="action:Option[Action]"></a>
+      <span class="permalink">
+      <a href="../../../../nl/knaw/dans/deposit/Doi.html#action:Option[nl.knaw.dans.deposit.Action.Action]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">action</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Action$.html#Action=nl.knaw.dans.deposit.Action.Value" class="extmbr" name="nl.knaw.dans.deposit.Action.Action">Action</a>]</span>
+      </span>
+      
+      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
