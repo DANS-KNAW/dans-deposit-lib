@@ -21,6 +21,7 @@ import java.util.{ Date, UUID }
 
 import better.files.File
 import nl.knaw.dans.bag.{ ChecksumAlgorithm, RelativePath }
+import nl.knaw.dans.deposit.Action.update
 import nl.knaw.dans.deposit.fixtures._
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.joda.time.format.ISODateTimeFormat
@@ -116,6 +117,7 @@ class DepositSpec extends TestSupportFixture
           DepositProperties.bagStoreBagId,
           DepositProperties.depositorUserId,
           DepositProperties.doiRegistered,
+          DepositProperties.dansDoiAction,
         )
 
         props.getString(DepositProperties.creationTimestamp) shouldBe fixedDateTimeNow.toString(ISODateTimeFormat.dateTime())
@@ -124,6 +126,7 @@ class DepositSpec extends TestSupportFixture
         props.getString(DepositProperties.bagStoreBagId) shouldBe bagId.toString
         props.getString(DepositProperties.depositorUserId) shouldBe depositor.userId
         props.getString(DepositProperties.doiRegistered) shouldBe "no"
+        props.getString(DepositProperties.dansDoiAction) shouldBe "create"
     }
   }
 
@@ -238,7 +241,7 @@ class DepositSpec extends TestSupportFixture
 
         depositProperties should exist
 
-        deposit.baseDir.list.toList should contain only (
+        deposit.baseDir.list.toList should contain only(
           bagDir,
           depositProperties,
         )
@@ -299,6 +302,7 @@ class DepositSpec extends TestSupportFixture
           DepositProperties.bagStoreBagId,
           DepositProperties.depositorUserId,
           DepositProperties.doiRegistered,
+          DepositProperties.dansDoiAction,
         )
 
         props.getString(DepositProperties.creationTimestamp) shouldBe fixedDateTimeNow.toString(ISODateTimeFormat.dateTime())
@@ -307,6 +311,7 @@ class DepositSpec extends TestSupportFixture
         props.getString(DepositProperties.bagStoreBagId) shouldBe bagId.toString
         props.getString(DepositProperties.depositorUserId) shouldBe depositor.userId
         props.getString(DepositProperties.doiRegistered) shouldBe "no"
+        props.getString(DepositProperties.dansDoiAction) shouldBe "create"
     }
   }
 
@@ -410,7 +415,7 @@ class DepositSpec extends TestSupportFixture
 
         depositProperties should exist
 
-        deposit.baseDir.list.toList should contain only (
+        deposit.baseDir.list.toList should contain only(
           bagDir,
           depositProperties,
         )
@@ -473,6 +478,7 @@ class DepositSpec extends TestSupportFixture
           DepositProperties.bagStoreBagId,
           DepositProperties.depositorUserId,
           DepositProperties.doiRegistered,
+          DepositProperties.dansDoiAction,
         )
 
         props.getString(DepositProperties.creationTimestamp) shouldBe fixedDateTimeNow.toString(ISODateTimeFormat.dateTime())
@@ -481,6 +487,7 @@ class DepositSpec extends TestSupportFixture
         props.getString(DepositProperties.bagStoreBagId) shouldBe bagId.toString
         props.getString(DepositProperties.depositorUserId) shouldBe depositor.userId
         props.getString(DepositProperties.doiRegistered) shouldBe "no"
+        props.getString(DepositProperties.dansDoiAction) shouldBe "create"
     }
   }
 
@@ -768,6 +775,26 @@ class DepositSpec extends TestSupportFixture
     val resultDeposit = deposit.withoutIsDoiRegistered
 
     resultDeposit.isDoiRegistered shouldBe empty
+  }
+
+  "dansDoiAction" should "return the required action of the doi" in {
+    val deposit = simpleDepositV0()
+
+    deposit.dansDoiAction.value shouldBe Action.create
+  }
+
+  "withDansDoiAction" should "change the value of the dans doi action and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withDansDoiAction(Action.update)
+
+    resultDeposit.dansDoiAction.value shouldBe Action.update
+  }
+
+  "withoutDansDoiAction" should "remove the dans doi action property and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withoutDansDoiAction
+
+    resultDeposit.dansDoiAction shouldBe empty
   }
 
   "fedoraId" should "return the fedora identifier of this deposit from deposit.properties" in {

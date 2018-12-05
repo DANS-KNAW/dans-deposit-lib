@@ -19,6 +19,7 @@ import java.nio.file.NoSuchFileException
 import java.util.UUID
 
 import better.files.File
+import nl.knaw.dans.deposit.Action.{ Action, create }
 import nl.knaw.dans.deposit.CurrentIngestStep.CurrentIngestStep
 import nl.knaw.dans.deposit.DepositProperties.{ stateDescription, _ }
 import nl.knaw.dans.deposit.SpringfieldPlayMode.SpringfieldPlayMode
@@ -66,6 +67,7 @@ case class DepositProperties(creation: Creation = Creation(),
 
       identifier.doi.value.foreach(setProperty(doiIdentifier, _))
       identifier.doi.registeredString.foreach(setProperty(doiRegistered, _))
+      identifier.doi.action.foreach(setProperty(dansDoiAction, _))
       identifier.fedora.value.foreach(setProperty(fedoraIdentifier, _))
 
       curation.dataManager.userId.foreach(setProperty(dataManagerUserId, _))
@@ -95,6 +97,7 @@ object DepositProperties {
   val bagStoreBagId         = "bag-store.bag-id"
   val bagStoreArchived      = "bag-store.archived"
   val doiIdentifier         = "identifier.doi"
+  val dansDoiAction         = "identifier.dans-doi.action"
   val doiRegistered         = "identifier.dans-doi.registered"
   val fedoraIdentifier      = "identifier.fedora"
   val dataManagerUserId     = "curation.datamanager.userId"
@@ -187,6 +190,7 @@ object DepositProperties {
         doi = new Doi(
           doiValue = properties.getString(doiIdentifier),
           doiRegistered = properties.getString(doiRegistered),
+          action = properties.getString(dansDoiAction),
         ),
         fedora = new FedoraId(
           value = properties.getString(fedoraIdentifier),
@@ -269,9 +273,12 @@ case class FedoraId(value: Option[String] = None) {
 }
 
 case class Doi(value: Option[String] = None,
-               registered: Option[Boolean] = Some(false)) {
-  def this(doiValue: String, doiRegistered: String) = {
-    this(Option(doiValue), Option(doiRegistered).map(BooleanUtils.toBoolean))
+               registered: Option[Boolean] = Some(false),
+               action: Option[Action] = Some(create)) {
+  def this(doiValue: String, doiRegistered: String, action: String) = {
+    this(Option(doiValue),
+      Option(doiRegistered).map(BooleanUtils.toBoolean),
+      Option(Action.withName(action)))
   }
 
   def registeredString: Option[String] = registered.map(BooleanUtils.toStringYesNo)
@@ -331,6 +338,13 @@ case class Springfield(domain: Option[String] = Option.empty,
            playMode: String) = {
     this(Option(domain), Option(user), Option(collection), Option(playMode).map(SpringfieldPlayMode.withName))
   }
+}
+
+object Action extends Enumeration {
+  type Action = Value
+
+  val create: Action = Value
+  val update: Action = Value
 }
 
 object StageState extends Enumeration {

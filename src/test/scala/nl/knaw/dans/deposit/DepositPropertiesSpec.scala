@@ -18,6 +18,7 @@ package nl.knaw.dans.deposit
 import java.nio.file.NoSuchFileException
 import java.util.UUID
 
+import nl.knaw.dans.deposit.Action.create
 import nl.knaw.dans.deposit.fixtures.{ FixDateTimeNow, TestDeposits, TestSupportFixture }
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{ DateTime, DateTimeUtils, DateTimeZone }
@@ -50,6 +51,7 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     props.identifier.doi.value shouldBe empty
     props.identifier.doi.registered.value shouldBe false
+    props.identifier.doi.action.value shouldBe Action.create
     props.identifier.fedora.value shouldBe empty
 
     props.curation.dataManager.email shouldBe empty
@@ -85,6 +87,7 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     props.identifier.doi.value.value shouldBe "some-random-doi"
     props.identifier.doi.registered.value shouldBe true
+    props.identifier.doi.action.value shouldBe create
     props.identifier.fedora.value.value shouldBe "some-random-fedora-identifier"
 
     props.curation.dataManager.email.value shouldBe "FILL.IN.YOUR@VALID-EMAIL.NL"
@@ -117,6 +120,7 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     props.identifier.doi.value shouldBe empty
     props.identifier.doi.registered shouldBe empty
+    props.identifier.doi.action.value shouldBe Action.create // The enum withName constructor does not allow action to be empty
     props.identifier.fedora.value shouldBe empty
 
     props.curation.dataManager.email shouldBe empty

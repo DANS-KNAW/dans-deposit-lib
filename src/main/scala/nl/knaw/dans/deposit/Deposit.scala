@@ -21,6 +21,7 @@ import java.util.{ Objects, UUID }
 import better.files.File
 import nl.knaw.dans.bag.ChecksumAlgorithm.ChecksumAlgorithm
 import nl.knaw.dans.bag.{ ChecksumAlgorithm, DansBag }
+import nl.knaw.dans.deposit.Action.Action
 import nl.knaw.dans.deposit.CurrentIngestStep.CurrentIngestStep
 import nl.knaw.dans.deposit.Deposit._
 import nl.knaw.dans.deposit.SpringfieldPlayMode.SpringfieldPlayMode
@@ -171,6 +172,32 @@ class Deposit private(val baseDir: File,
       identifier = properties.identifier.copy(
         doi = properties.identifier.doi.copy(
           registered = Option.empty,
+        ),
+      ),
+    )
+
+    withDepositProperties(newProperties)
+  }
+
+  def dansDoiAction: Option[Action] = properties.identifier.doi.action
+
+  def withDansDoiAction(action: Action): Deposit = {
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        doi = properties.identifier.doi.copy(
+          action = Option(action),
+        ),
+      ),
+    )
+
+    withDepositProperties(newProperties)
+  }
+
+  def withoutDansDoiAction: Deposit = {
+    val newProperties = properties.copy(
+      identifier = properties.identifier.copy(
+        doi = properties.identifier.doi.copy(
+          action = Option.empty,
         ),
       ),
     )
