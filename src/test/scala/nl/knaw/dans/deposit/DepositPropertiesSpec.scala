@@ -164,7 +164,7 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     inside(DepositProperties.read(file)) {
       case Failure(e: IllegalArgumentException) =>
-        e should have message "requirement failed: could not find mandatory field 'state.label'"
+        e should have message "could not find mandatory field 'state.label'"
     }
   }
 

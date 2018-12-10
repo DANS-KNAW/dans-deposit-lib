@@ -16,19 +16,10 @@
 package nl.knaw.dans.deposit
 
 import java.nio.file.NoSuchFileException
-import java.util.UUID
 
 import better.files.File
-import nl.knaw.dans.deposit.Action.{ Action, create }
-import nl.knaw.dans.deposit.CurrentIngestStep.CurrentIngestStep
-import nl.knaw.dans.deposit.DepositProperties.{ stateDescription, _ }
-import nl.knaw.dans.deposit.SpringfieldPlayMode.SpringfieldPlayMode
-import nl.knaw.dans.deposit.StageState.StageState
-import nl.knaw.dans.deposit.StateLabel.StateLabel
+import nl.knaw.dans.deposit.DepositProperties._
 import org.apache.commons.configuration.PropertiesConfiguration
-import org.apache.commons.lang.BooleanUtils
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 
 import scala.util.{ Failure, Try }
 
@@ -155,211 +146,17 @@ object DepositProperties {
    * @return if successful a new `DepositProperties` representing the provided `properties`
    *         else a `Failure` with a `NoSuchElementException` if not all deposit properties were present
    */
-  def load(properties: PropertiesConfiguration): Try[DepositProperties] = Try {
-    val creationTimestampValue = properties.getString(creationTimestamp)
-    val stateLabelValue = properties.getString(stateLabel)
-    val stateDescriptionValue = properties.getString(stateDescription)
-    val depositorUserIdValue = properties.getString(depositorUserId)
-    val bagStoreBagIdValue = properties.getString(bagStoreBagId)
-
-    require(creationTimestampValue != null, s"could not find mandatory field '$creationTimestamp'")
-    require(stateLabelValue != null, s"could not find mandatory field '$stateLabel'")
-    require(stateDescriptionValue != null, s"could not find mandatory field '$stateDescription'")
-    require(depositorUserIdValue != null, s"could not find mandatory field '$depositorUserId'")
-    require(bagStoreBagIdValue != null, s"could not find mandatory field '$bagStoreBagId'")
-
-    DepositProperties(
-      creation = new Creation(
-        timestamp = creationTimestampValue
-      ),
-      state = new State(
-        label = stateLabelValue,
-        description = stateDescriptionValue
-      ),
-      depositor = Depositor(
-        userId = depositorUserIdValue
-      ),
-      ingest = new Ingest(
-        currentStep = properties.getString(ingestCurrentStep),
-      ),
-      bagStore = new BagStore(
-        bagId = bagStoreBagIdValue,
-        archived = properties.getString(bagStoreArchived)
-      ),
-      identifier = Identifier(
-        doi = new Doi(
-          doiValue = properties.getString(doiIdentifier),
-          doiRegistered = properties.getString(doiRegistered),
-          action = properties.getString(dansDoiAction),
-        ),
-        fedora = new FedoraId(
-          value = properties.getString(fedoraIdentifier),
-        ),
-      ),
-      curation = new Curation(
-        userId = properties.getString(dataManagerUserId),
-        email = properties.getString(datamanagerEmail),
-        isNewVersion = properties.getString(isNewVersion),
-        required = properties.getString(curationRequired),
-        performed = properties.getString(curationPerformed)
-      ),
-      springfield = new Springfield(
-        domain = properties.getString(springfieldDomain),
-        user = properties.getString(springfieldUser),
-        collection = properties.getString(springfieldCollection),
-        playMode = properties.getString(sprinfieldPlaymode)
-      ),
-      staged = new Staged(
-        state = properties.getString(stagedState)
-      )
-    )
+  def load(properties: PropertiesConfiguration): Try[DepositProperties] = {
+    for {
+      creation <- Creation.load(properties)
+      state <- State.load(properties)
+      depositor <- Depositor.load(properties)
+      ingest <- Ingest.load(properties)
+      bagStore <- BagStore.load(properties)
+      identifier <- Identifier.load(properties)
+      curation = Curation.load(properties)
+      springfield <- Springfield.load(properties)
+      staged <- Staged.load(properties)
+    } yield DepositProperties(creation, state, depositor, ingest, bagStore, identifier, curation, springfield, staged)
   }
-}
-
-case class Creation(timestamp: DateTime = DateTime.now) {
-  def this(timestamp: String) = {
-    this(DateTime.parse(timestamp, ISODateTimeFormat.dateTime().withOffsetParsed()))
-  }
-
-  def timestampString: String = timestamp.toString(ISODateTimeFormat.dateTime().withOffsetParsed())
-}
-
-object StateLabel extends Enumeration {
-  type StateLabel = Value
-
-  val ARCHIVED: StateLabel = Value
-  val DRAFT: StateLabel = Value
-  val FAILED: StateLabel = Value
-  val FINALIZING: StateLabel = Value
-  val INVALID: StateLabel = Value
-  val REJECTED: StateLabel = Value
-  val STALLED: StateLabel = Value
-  val SUBMITTED: StateLabel = Value
-  val UPLOADED: StateLabel = Value
-}
-
-case class State(label: StateLabel, description: String) {
-  def this(label: String, description: String) = {
-    this(StateLabel.withName(label), description)
-  }
-}
-
-case class Depositor(userId: String)
-
-object CurrentIngestStep extends Enumeration {
-  type CurrentIngestStep = Value
-
-  val VALIDATE: CurrentIngestStep = Value
-  val PID_GENERATOR: CurrentIngestStep = Value
-  val FEDORA: CurrentIngestStep = Value
-  val SPRINGFIELD: CurrentIngestStep = Value
-  val BAGSTORE: CurrentIngestStep = Value
-  val BAGINDEX: CurrentIngestStep = Value
-  val SOLR4FILES: CurrentIngestStep = Value
-}
-
-case class Ingest(currentStep: Option[CurrentIngestStep] = None) {
-  def this(currentStep: String) = {
-    this(Option(currentStep).map(CurrentIngestStep.withName))
-  }
-}
-
-case class Identifier(doi: Doi = Doi(), fedora: FedoraId = FedoraId())
-
-case class FedoraId(value: Option[String] = None) {
-  def this(value: String) = {
-    this(Option(value))
-  }
-}
-
-case class Doi(value: Option[String] = None,
-               registered: Option[Boolean] = Some(false),
-               action: Option[Action] = Some(create)) {
-  def this(doiValue: String, doiRegistered: String, action: String) = {
-    this(Option(doiValue),
-      Option(doiRegistered).map(BooleanUtils.toBoolean),
-      Option(Action.withName(action)))
-  }
-
-  def registeredString: Option[String] = registered.map(BooleanUtils.toStringYesNo)
-}
-
-case class BagStore(bagId: UUID,
-                    archived: Option[Boolean] = None) {
-  def this(bagId: String, archived: String) = {
-    this(UUID.fromString(bagId), Option(archived).map(BooleanUtils.toBoolean))
-  }
-
-  def archivedString: Option[String] = archived.map(BooleanUtils.toStringYesNo)
-
-  def isArchived: Boolean = archived.getOrElse(false)
-}
-
-case class DataManager(userId: Option[String] = Option.empty,
-                       email: Option[String] = Option.empty)
-
-case class Curation(dataManager: DataManager = DataManager(),
-                    isNewVersion: Option[Boolean] = Option.empty,
-                    required: Option[Boolean] = Option.empty,
-                    performed: Option[Boolean] = Option.empty) {
-  def this(userId: String,
-           email: String,
-           isNewVersion: String,
-           required: String,
-           performed: String) = {
-    this(DataManager(Option(userId), Option(email)),
-      Option(isNewVersion).map(BooleanUtils.toBoolean),
-      Option(required).map(BooleanUtils.toBoolean),
-      Option(performed).map(BooleanUtils.toBoolean),
-    )
-  }
-
-  def isNewVersionString: Option[String] = isNewVersion.map(BooleanUtils.toStringYesNo)
-
-  def requiredString: Option[String] = required.map(BooleanUtils.toStringYesNo)
-
-  def performedString: Option[String] = performed.map(BooleanUtils.toStringYesNo)
-}
-
-object SpringfieldPlayMode extends Enumeration {
-  type SpringfieldPlayMode = Value
-
-  val CONTINUOUS: SpringfieldPlayMode = Value("continuous")
-  val MENU: SpringfieldPlayMode = Value("menu")
-}
-
-case class Springfield(domain: Option[String] = Option.empty,
-                       user: Option[String] = Option.empty,
-                       collection: Option[String] = Option.empty,
-                       playMode: Option[SpringfieldPlayMode] = Option.empty) {
-  def this(domain: String,
-           user: String,
-           collection: String,
-           playMode: String) = {
-    this(Option(domain), Option(user), Option(collection), Option(playMode).map(SpringfieldPlayMode.withName))
-  }
-}
-
-object Action extends Enumeration {
-  type Action = Value
-
-  val create: Action = Value
-  val update: Action = Value
-}
-
-object StageState extends Enumeration {
-  type StageState = Value
-
-  val DRAFT: StageState = Value
-  val FINALIZING: StageState = Value
-  val INVALID: StageState = Value
-  val SUBMITTED: StageState = Value
-  val REJECTED: StageState = Value
-  val FAILED: StageState = Value
-  val STALLED: StageState = Value
-  val ARCHIVED: StageState = Value
-}
-
-case class Staged(state: Option[StageState] = Option.empty) {
-  def this(state: String) = this(Option(state).map(StageState.withName))
 }
