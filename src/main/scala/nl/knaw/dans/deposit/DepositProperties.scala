@@ -31,7 +31,8 @@ case class DepositProperties(creation: Creation = Creation(),
                              identifier: Identifier = Identifier(),
                              curation: Curation = Curation(),
                              springfield: Springfield = Springfield(),
-                             staged: Staged = Staged()) {
+                             staged: Staged = Staged(),
+                             sword2: Sword2 = Sword2()) {
 
   /**
    * Writes the `DepositProperties` to `file` on the filesystem.
@@ -73,6 +74,8 @@ case class DepositProperties(creation: Creation = Creation(),
       springfield.playMode.foreach(setProperty(sprinfieldPlaymode, _))
 
       staged.state.foreach(state => setProperty(stagedState, state.toString))
+
+      sword2.contentType.foreach(contentType => setProperty(sword2ContentType, contentType.toString))
     }.save(file.toJava)
   }
 }
@@ -101,6 +104,7 @@ object DepositProperties {
   val springfieldCollection = "springfield.collection"
   val sprinfieldPlaymode    = "springfield.playmode"
   val stagedState           = "staged.state"
+  val sword2ContentType     = "easy-sword2.client-message.content-type"
   // @formatter:on
 
   /**
@@ -157,6 +161,7 @@ object DepositProperties {
       curation = Curation.load(properties)
       springfield <- Springfield.load(properties)
       staged <- Staged.load(properties)
-    } yield DepositProperties(creation, state, depositor, ingest, bagStore, identifier, curation, springfield, staged)
+      sword2 <- Sword2.load(properties)
+    } yield DepositProperties(creation, state, depositor, ingest, bagStore, identifier, curation, springfield, staged, sword2)
   }
 }

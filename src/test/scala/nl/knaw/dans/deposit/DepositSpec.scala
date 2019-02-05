@@ -21,7 +21,6 @@ import java.util.{ Date, UUID }
 
 import better.files.File
 import nl.knaw.dans.bag.{ ChecksumAlgorithm, RelativePath }
-import nl.knaw.dans.deposit.Action.update
 import nl.knaw.dans.deposit.fixtures._
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.joda.time.format.ISODateTimeFormat
@@ -1037,6 +1036,28 @@ class DepositSpec extends TestSupportFixture
     val resultDeposit = deposit.withoutStageState
 
     resultDeposit.stageState shouldBe empty
+  }
+
+  "sword2ContentType" should "return the sword2 contentType from deposit.properties" in {
+    val deposit = simpleDepositV0()
+
+    deposit.sword2ContentType.value shouldBe Sword2ContentType.OCTET_STREAM
+  }
+
+  "withSword2ContentType" should "change the sword contentType and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val contentType = Sword2ContentType.ZIP
+
+    val resultDeposit = deposit.withSword2ContentType(contentType)
+
+    resultDeposit.sword2ContentType.value shouldBe contentType
+  }
+
+  "withoutSword2ContentType" should "remove the sword contentType and return the new DepositProperties" in {
+    val deposit = simpleDepositV0()
+    val resultDeposit = deposit.withoutSword2ContentType
+
+    resultDeposit.sword2ContentType shouldBe empty
   }
 
   "save" should "write changes made to the Bag object in the bag to the deposit on file system" in {

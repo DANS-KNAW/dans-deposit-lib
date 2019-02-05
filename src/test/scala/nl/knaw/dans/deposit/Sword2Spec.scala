@@ -20,28 +20,28 @@ import org.apache.commons.configuration.PropertiesConfiguration
 
 import scala.util.{ Failure, Success }
 
-class StagedSpec extends TestSupportFixture {
+class Sword2Spec extends TestSupportFixture {
 
-  "load" should "yield a Staged object with state present" in {
+  "load" should "yield a Sword2 object with contentType present" in {
     val props = new PropertiesConfiguration()
-    props.addProperty("staged.state", "REJECTED")
+    props.addProperty("easy-sword2.client-message.content-type", "application/zip")
 
-    Staged.load(props) should matchPattern { case Success(Staged(Some(StageState.REJECTED))) => }
+    Sword2.load(props) should matchPattern { case Success(Sword2(Some(Sword2ContentType.ZIP))) => }
   }
 
-  it should "yield a Staged object with no state present" in {
+  it should "yield a Sword2 object with no contentType present" in {
     val props = new PropertiesConfiguration()
-    // no staged.state
+    // no easy-sword2.client-message.content-type
 
-    Staged.load(props) should matchPattern { case Success(Staged(None)) => }
+    Sword2.load(props) should matchPattern { case Success(Sword2(None)) => }
   }
 
-  it should "fail when state has an invalid value" in {
+  it should "fail when contentType has an invalid value" in {
     val props = new PropertiesConfiguration()
-    props.addProperty("staged.state", "invalid value")
+    props.addProperty("easy-sword2.client-message.content-type", "invalid value")
 
-    Staged.load(props) should matchPattern {
-      case Failure(NoSuchElementException("No value found for 'invalid value' in field 'staged.state'", _)) =>
+    Sword2.load(props) should matchPattern {
+      case Failure(NoSuchElementException("No value found for 'invalid value' in field 'easy-sword2.client-message.content-type'", _)) =>
     }
   }
 }
