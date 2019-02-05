@@ -67,6 +67,8 @@ class DepositPropertiesSpec extends TestSupportFixture
 
     props.staged.state shouldBe empty
 
+    props.sword2.contentType shouldBe empty
+
     // unset fixed DateTime.now
     DateTimeUtils.setCurrentMillisOffset(0L)
   }
@@ -102,6 +104,8 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.springfield.playMode.value shouldBe SpringfieldPlayMode.CONTINUOUS
 
     props.staged.state.value shouldBe StageState.ARCHIVED
+
+    props.sword2.contentType.value shouldBe Sword2ContentType.OCTET_STREAM
   }
 
   it should "read the properties from a deposit.properties with minimal properties" in {
@@ -135,6 +139,8 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.springfield.playMode shouldBe empty
 
     props.staged.state shouldBe empty
+
+    props.sword2.contentType shouldBe empty
   }
 
   it should "fail when the file does not exist" in {

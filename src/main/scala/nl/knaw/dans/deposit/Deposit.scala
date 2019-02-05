@@ -27,6 +27,7 @@ import nl.knaw.dans.deposit.Deposit._
 import nl.knaw.dans.deposit.SpringfieldPlayMode.SpringfieldPlayMode
 import nl.knaw.dans.deposit.StageState.StageState
 import nl.knaw.dans.deposit.StateLabel.StateLabel
+import nl.knaw.dans.deposit.Sword2ContentType.Sword2ContentType
 import org.joda.time.DateTime
 
 import scala.language.{ implicitConversions, postfixOps }
@@ -447,6 +448,20 @@ class Deposit private(val baseDir: File,
 
   def withoutStageState: Deposit = {
     val newProperties = properties.copy(staged = Staged())
+
+    withDepositProperties(newProperties)
+  }
+
+  def sword2ContentType: Option[Sword2ContentType] = properties.sword2.contentType
+
+  def withSword2ContentType(contentType: Sword2ContentType): Deposit = {
+    val newProperties = properties.copy(sword2 = Sword2(Some(contentType)))
+
+    withDepositProperties(newProperties)
+  }
+
+  def withoutSword2ContentType: Deposit = {
+    val newProperties = properties.copy(sword2 = Sword2())
 
     withDepositProperties(newProperties)
   }
