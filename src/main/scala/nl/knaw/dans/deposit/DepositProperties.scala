@@ -61,6 +61,7 @@ case class DepositProperties(creation: Creation = Creation(),
       identifier.doi.registeredString.foreach(setProperty(doiRegistered, _))
       identifier.doi.action.foreach(setProperty(dansDoiAction, _))
       identifier.fedora.value.foreach(setProperty(fedoraIdentifier, _))
+      identifier.urn.value.foreach(setProperty(urnIdentifier, _))
 
       curation.dataManager.userId.foreach(setProperty(dataManagerUserId, _))
       curation.dataManager.email.foreach(setProperty(datamanagerEmail, _))
@@ -94,6 +95,7 @@ object DepositProperties {
   val dansDoiAction         = "identifier.dans-doi.action"
   val doiRegistered         = "identifier.dans-doi.registered"
   val fedoraIdentifier      = "identifier.fedora"
+  val urnIdentifier         = "identifier.urn"
   val dataManagerUserId     = "curation.datamanager.userId"
   val datamanagerEmail      = "curation.datamanager.email"
   val isNewVersion          = "curation.is-new-version"

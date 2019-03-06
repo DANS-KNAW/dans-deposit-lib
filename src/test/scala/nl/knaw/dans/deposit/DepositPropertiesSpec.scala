@@ -53,6 +53,7 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.identifier.doi.registered.value shouldBe false
     props.identifier.doi.action.value shouldBe Action.create
     props.identifier.fedora.value shouldBe empty
+    props.identifier.urn.value shouldBe empty
 
     props.curation.dataManager.email shouldBe empty
     props.curation.dataManager.userId shouldBe empty
@@ -91,6 +92,7 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.identifier.doi.registered.value shouldBe true
     props.identifier.doi.action.value shouldBe create
     props.identifier.fedora.value.value shouldBe "some-random-fedora-identifier"
+    props.identifier.urn.value.value shouldBe "urn:dans:easy:xml"
 
     props.curation.dataManager.email.value shouldBe "FILL.IN.YOUR@VALID-EMAIL.NL"
     props.curation.dataManager.userId.value shouldBe "myadmin"
@@ -126,6 +128,7 @@ class DepositPropertiesSpec extends TestSupportFixture
     props.identifier.doi.registered shouldBe empty
     props.identifier.doi.action.value shouldBe Action.create // The enum withName constructor does not allow action to be empty
     props.identifier.fedora.value shouldBe empty
+    props.identifier.urn.value shouldBe empty
 
     props.curation.dataManager.email shouldBe empty
     props.curation.dataManager.userId shouldBe empty

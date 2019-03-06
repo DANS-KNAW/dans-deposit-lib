@@ -15,17 +15,21 @@
  */
 package nl.knaw.dans.deposit
 
+import nl.knaw.dans.deposit.fixtures.TestSupportFixture
 import org.apache.commons.configuration.PropertiesConfiguration
 
-import scala.util.Try
+class UrnSpec extends TestSupportFixture {
+  "load" should "yield a Urn object with value present" in {
+    val urn = "urn:dans:easy:some:test:xml"
+    val props = new PropertiesConfiguration()
+    props.addProperty("identifier.urn", urn)
 
-case class Identifier(doi: Doi = Doi(), fedora: FedoraId = FedoraId(), urn: Urn = Urn())
-object Identifier {
-  def load(properties: PropertiesConfiguration): Try[Identifier] = {
-    for {
-      doi <- Doi.load(properties)
-      fedora = FedoraId.load(properties)
-      urn = Urn.load(properties)
-    } yield Identifier(doi, fedora, urn)
+    Urn.load(props) shouldBe Urn(Some(urn))
+  }
+
+  it should "yield a urn object with no value present" in {
+    val props = new PropertiesConfiguration()
+
+    Urn.load(props) shouldBe Urn(None)
   }
 }

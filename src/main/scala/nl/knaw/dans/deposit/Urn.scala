@@ -15,17 +15,12 @@
  */
 package nl.knaw.dans.deposit
 
+import nl.knaw.dans.deposit.DepositProperties.urnIdentifier
 import org.apache.commons.configuration.PropertiesConfiguration
 
-import scala.util.Try
-
-case class Identifier(doi: Doi = Doi(), fedora: FedoraId = FedoraId(), urn: Urn = Urn())
-object Identifier {
-  def load(properties: PropertiesConfiguration): Try[Identifier] = {
-    for {
-      doi <- Doi.load(properties)
-      fedora = FedoraId.load(properties)
-      urn = Urn.load(properties)
-    } yield Identifier(doi, fedora, urn)
+case class Urn(value: Option[String] = None)
+object Urn {
+  def load(properties: PropertiesConfiguration): Urn = {
+    Urn(Option(properties.getString(urnIdentifier)))
   }
 }

@@ -25,15 +25,17 @@ class IdentifierSpec extends TestSupportFixture {
   "load" should "yield a Identifier object all fields present" in {
     val doi = "some-random-doi"
     val fedoraId = "some fedora id"
+    val urn = "urn:dans:easy:some:test:xml"
     val props = new PropertiesConfiguration()
     props.addProperty("identifier.doi", doi)
     props.addProperty("identifier.dans-doi.action", "update")
     props.addProperty("identifier.dans-doi.registered", "yes")
     props.addProperty("identifier.fedora", "some fedora id")
     props.addProperty("identifier.fedora", fedoraId)
+    props.addProperty("identifier.urn", urn)
 
     Identifier.load(props) should matchPattern {
-      case Success(Identifier(Doi(Some(`doi`), Some(true), Some(Action.update)), FedoraId(Some(`fedoraId`)))) =>
+      case Success(Identifier(Doi(Some(`doi`), Some(true), Some(Action.update)), FedoraId(Some(`fedoraId`)), Urn(Some(`urn`)))) =>
     }
   }
 }
